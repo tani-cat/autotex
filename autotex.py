@@ -12,9 +12,9 @@ import subprocess
 import sys
 
 # 起動元によって対応
-if __name__ == '__main__':
+try:
     from set_logger import set_logger
-else:
+except ImportError:
     from .set_logger import set_logger
 
 
@@ -78,11 +78,18 @@ def _output_error(logger, log_text_l):
     return
 
 
-def compile_tex(src_dir, logger=None):
+def compile_tex(src_dir, dst_dir=SAVE_DIR, logger=None):
     """TeXファイルをコンパイルする
 
-    src_dir: ソースファイルのディレクトリ
-    logger: ロガー(なければ作る)
+    Args:
+        src_dir (str): ソースファイルのディレクトリ
+        dst_dir (:obj:`str`, optional): ファイルを出力するディレクトリ
+        logger (:obj:`logging.Logger`, optional): ロガー(なければ作る)
+
+    Returns:
+        dict:
+            `'filename'`: 出力ファイル名
+            `'content'`: 出力PDFのバイナリデータ
     """
     if logger is None:
         logger = set_logger()
@@ -104,6 +111,7 @@ def compile_tex(src_dir, logger=None):
     logger.debug('ソースデータを複製')
 
     # 次にカレントディレクトリを作業ディレクトリに変更
+    current_dir = os.getcwd()
     os.chdir(WORK_DIR)
     src_path = glob.glob(os.path.join(WORK_DIR, '**', '*.tex'), recursive=True)[0]
 
@@ -163,6 +171,7 @@ def compile_tex(src_dir, logger=None):
     # キャッシュを削除する
     shutil.rmtree(WORK_DIR)
     filename = os.path.basename(pdf_path)
+    os.chdir(current_dir)
     return {'filename': filename, 'content': pdf_data}
 
 
@@ -181,7 +190,7 @@ def main(args):
         return
 
     # コンパイル処理
-    response = compile_tex(src_dir, logger)
+    response = compile_tex(src_dir, logger=logger)
     if response is None:
         logger.info('処理を中止しました')
         return

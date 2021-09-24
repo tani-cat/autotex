@@ -13,8 +13,11 @@ TeXファイルを自動でコンパイルしPDFを生成するモジュール
 python autotex.py ソースディレクトリ
 ```
 
+### 結果
+
 ## モジュールとして利用する場合
 ```python
 # python
 from autotex import compile_tex
+compile_tex('src_dir', dst_dir='dst_dir', logger=logger)
 ```
